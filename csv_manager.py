@@ -16,7 +16,6 @@ def import_csv(words_list: list, class_name, filename = 'data.csv'):
         translate = line['translate']
         is_learned = True if line['is_learned'] == 'True' else False
         answers = line['answers'][1:-1].replace(' ', '').split(',')
-        print(len(answers))
         for i in range(len(answers)):
             if answers[i] == 'True':
                 answers[i] = True

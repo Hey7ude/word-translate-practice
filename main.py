@@ -1,8 +1,5 @@
-from tkinter import Y
-from models import User
-
 def main():
-    u1 = User('user')
-    
+    import controller
+
 if __name__ == '__main__':
     main()

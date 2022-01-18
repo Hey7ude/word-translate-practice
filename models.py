@@ -21,27 +21,21 @@ class User:
         self.import_csv()
     
     def add_word(self, word: str, translate: str):
-        self.words.append(Word(word, translate))
-        self.export_csv()
+        self.words.append(Word(word, translate, False, []))
         
     def get_unlearned_words(self):
         for word in self.words:
             if not word.is_learned:
                 yield word
-    
-    def start(self):
-        for word in self.get_unlearned_words():
-            print(word.word)
-            inp = input('type y if you know, type anything else if you dont:\n')
-            if inp == 'y':
-                word.answers.append(True)
-            else:
-                word.answers.append(False)
-            if word.repeated() % self.repeat == 0:
-                inp = input(f'You repeated this word for {word.repeated()} days.\nDid you learned this word? type y if you do:\n')
-                if inp == 'y':
-                    word.is_learned = True
-            self.export_csv()
+        
+    def add_answer(self, word, answer: bool):
+        word.answers.append(answer)
+        
+    def check_repeated(self, word):
+        return True if word.repeated() % self.repeat == 0 else False
+        
+    def learned(self, word):
+        word.is_learned = True
     
     def import_csv(self):
         csv_manager.import_csv(self.words, Word)

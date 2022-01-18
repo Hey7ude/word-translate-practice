@@ -1,4 +1,6 @@
-from tkinter import END, Entry, Frame, Label, Listbox, Tk, Button, Toplevel
+from tkinter import END, Entry, Frame, Label, Scrollbar, Tk, Button, Toplevel
+from tkinter.messagebox import showinfo
+from tkinter.ttk import Treeview
 
 
 class UserPanel(Tk):
@@ -17,28 +19,50 @@ class UserPanel(Tk):
         self.frm_labels =Frame(self)
         Label(self.frm_labels, text='Word Translate Practice').grid(row=1, column=1)
         Label(self.frm_labels, text='You can use commands listed below:').grid(row=2,column=1)
-        self.frm_labels.grid(row=1, column=1)
+        self.frm_labels.grid(row=1, column=1, sticky='ns')
         self.frm_buttons = Frame(self)
         Button(self.frm_buttons, text='Add word', command=self.add_word).grid(row=1, column=1)
         Button(self.frm_buttons, text='Start Day', command=self.start_day).grid(row=1, column=2)
-        self.frm_buttons.grid(row=2,column=1)
-        self.frm_list_box = Frame(self)
-        self.list_box = Listbox(self.frm_list_box)
-        self.list_box.grid(row=1, column=1)
-        self.add_to_listbox()
-        self.frm_list_box.grid(row=3, column=1)
+        self.frm_buttons.grid(row=2,column=1, sticky='ns')
+        self.columns = ('word', 'translate', 'is_learned', 'answers')
+        self.tree_view = Treeview(self, columns=self.columns, show='headings')
+        self.tree_view.heading('word', text='Word')
+        self.tree_view.heading('translate', text='Translate')
+        self.tree_view.heading('is_learned', text='is_learned')
+        self.tree_view.heading('answers', text='Answers')
+        self.add_to_tree()
+        self.tree_view.bind('<<TreeviewSelect>>', self.item_selected)
+        self.tree_view.grid(row=3, column=1, sticky='nsew')
+        self.vscrollbar = Scrollbar(self, orient='vertical', command=self.tree_view.yview)
+        self.vscrollbar.grid(row=3, column=2, sticky='ns')
+        self.hscrollbar = Scrollbar(self, orient='horizontal', command=self.tree_view.xview)
+        self.hscrollbar.grid(row=4, column=1, sticky='ew')
+        self.tree_view.configure(yscroll=self.vscrollbar.set, xscroll=self.hscrollbar.set)
         
-    def add_to_listbox(self):
-        self.list_box.delete(0, END)
+    def add_to_tree(self):
+        for i in self.tree_view.get_children():
+            self.tree_view.delete(i)
         for word in self.words_list:
-            self.list_box.insert('end', f'word: {word.word} - repeated: {word.repeated()}')
+            values = (word.word, word.translate, word.is_learned, word.answers)
+            self.tree_view.insert('', 'end', values=values)
+
+    def item_selected(self, event):
+        for selected_item in self.tree_view.selection():
+            item = self.tree_view.item(selected_item)
+            record = item['values']
+            showinfo(title='Information', message=f"""
+                     Word: {record[0]}
+                     Translate: {record[1]}
+                     Learned: {record[2]}
+                     Answers: {record[3]}
+                     """)
             
     def add_word(self):
         p = AddWordPanel(self)
         word = p.get_word()
         translate = p.get_translate()
         self.callback1(word, translate)
-        self.add_to_listbox()
+        self.add_to_tree()
         self.export_csv()
         
     def start_day(self):
@@ -48,7 +72,7 @@ class UserPanel(Tk):
                 if self.check_repeated(word) == True:
                     if WordLearn(self, word).get_response() == True:
                         self.learned(word)
-        self.add_to_listbox()
+        self.add_to_tree()
         self.export_csv()
         
         

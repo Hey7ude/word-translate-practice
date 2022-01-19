@@ -61,15 +61,18 @@ class UserPanel(Tk):
         p = AddWordPanel(self)
         word = p.get_word()
         translate = p.get_translate()
-        self.callback1(word, translate)
-        self.add_to_tree()
-        self.export_csv()
+        if word and translate:
+            self.callback1(word, translate)
+            self.add_to_tree()
+            self.export_csv()
         
     def start_day(self):
         for word in self.words_list:
             if not word.is_learned:
-                self.add_answer(word, WordCheck(self, word).get_response())
-                if self.check_repeated(word) == True:
+                r = WordCheck(self, word).get_response()
+                if r is not None:
+                    self.add_answer(word, r)
+                if self.check_repeated(word) == True and len(word.answers) != 0:
                     if WordLearn(self, word).get_response() == True:
                         self.learned(word)
         self.add_to_tree()
@@ -82,17 +85,15 @@ class AddWordPanel(Toplevel):
         self.title('Add Word')
         self.word = None
         self.translate = None
-        self.frm_word = Frame(self)
-        self.frm_translate = Frame(self)
-        Label(self.frm_word, text='Word:').grid(row=1, column=1)
-        Label(self.frm_translate, text='Translate:').grid(row=1, column=1)
-        self.ent_word = Entry(self.frm_word)
-        self.ent_translate = Entry(self.frm_translate)
-        self.ent_word.grid(row=1, column=2)
-        self.ent_translate.grid(row=1, column=2)
-        self.frm_word.grid(row=1, column=1)
-        self.frm_translate.grid(row=2, column=1)
-        Button(self, text='Add', command = self.add).grid(row=3, column=1)
+        self.rowconfigure([1,2,3], minsize=50, weight=1)
+        self.columnconfigure([1,2], minsize=50, weight=1)
+        Label(self, text='Word:').grid(row=1, column=1, sticky='e', padx=5)
+        Label(self, text='Translate:').grid(row=2, column=1, sticky='e', padx=5)
+        self.ent_word = Entry(self)
+        self.ent_translate = Entry(self)
+        self.ent_word.grid(row=1, column=2, sticky='w', padx=5)
+        self.ent_translate.grid(row=2, column=2, sticky='w', padx=5)
+        Button(self, text='Add', command = self.add).grid(row=3, column=2, sticky='w')
         
     def add(self):
         self.word = self.ent_word.get()
@@ -101,11 +102,11 @@ class AddWordPanel(Toplevel):
             self.destroy()
             
     def get_word(self):
-        self.word is None and self.wait_window()
+        self.word is None and self.winfo_exists() and self.wait_window()
         return self.word
     
     def get_translate(self):
-        self.translate is None and self.wait_window()
+        self.translate is None and self.winfo_exists() and self.wait_window()
         return self.translate
             
             
@@ -126,7 +127,7 @@ class WordCheck(Toplevel):
         self.destroy()
         
     def get_response(self):
-        self.response is None and self.wait_window()
+        self.response is None and self.winfo_exists() and self.wait_window()
         return self.response
     
 class WordLearn(Toplevel):

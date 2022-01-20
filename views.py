@@ -5,7 +5,8 @@ from tkinter.ttk import Treeview
 
 
 class UserPanel(Tk):
-    def __init__(self, words_list, add_word_callback, add_answer_callback, check_repeated_callback, learned_callback, export_csv_callback, import_csv_callback):
+    def __init__(self, words_list, add_word_callback, add_answer_callback, check_repeated_callback, 
+                 learned_callback, export_csv_callback, import_csv_callback, get_word_by_id_callback):
         super(UserPanel, self).__init__()
         self.title('Word Translate Practice')
         self.words_list = words_list
@@ -15,6 +16,7 @@ class UserPanel(Tk):
         self.learned = learned_callback
         self.export_csv = export_csv_callback
         self.import_csv = import_csv_callback
+        self.get_word_by_id = get_word_by_id_callback
         self.rowconfigure([1,2,3], minsize=50, weight=1)
         self.columnconfigure(1, minsize=50, weight=1)
         self.frm_labels =Frame(self)
@@ -25,8 +27,9 @@ class UserPanel(Tk):
         Button(self.frm_buttons, text='Add word', command=self.add_word).grid(row=1, column=1)
         Button(self.frm_buttons, text='Start Day', command=self.start_day).grid(row=1, column=2)
         self.frm_buttons.grid(row=2,column=1, sticky='ns')
-        self.columns = ('word', 'translate', 'is_learned', 'answers')
+        self.columns = ('id', 'word', 'translate', 'is_learned', 'answers')
         self.tree_view = Treeview(self, columns=self.columns, show='headings')
+        self.tree_view.heading('id', text='Id')
         self.tree_view.heading('word', text='Word')
         self.tree_view.heading('translate', text='Translate')
         self.tree_view.heading('is_learned', text='is_learned')
@@ -44,19 +47,15 @@ class UserPanel(Tk):
         for i in self.tree_view.get_children():
             self.tree_view.delete(i)
         for word in self.words_list:
-            values = (word.word, word.translate, word.is_learned, word.answers)
+            values = (word.id, word.word, word.translate, word.is_learned, word.answers)
             self.tree_view.insert('', 'end', values=values)
 
     def item_selected(self, event):
         for selected_item in self.tree_view.selection():
             item = self.tree_view.item(selected_item)
             record = item['values']
-            showinfo(title='Information', message=f"""
-                     Word: {record[0]}
-                     Translate: {record[1]}
-                     Learned: {record[2]}
-                     Answers: {record[3]}
-                     """)
+            word = self.get_word_by_id(record[0])
+            WordDetailPanel(self, word)
             
     def add_word(self):
         p = AddWordPanel(self)
@@ -158,10 +157,27 @@ class WordLearn(Toplevel):
 
 class WordDetailPanel(Toplevel):
     def __init__(self, master, word):
-        super(WordDetailPanel, self).__init__(self, master)
+        super(WordDetailPanel, self).__init__(master)
         self.title(f'{word.word} - Detail')
-        Label(master, text='Word:').grid(row=1, column=1)
-        Label(master, text='Translate:').grid(row=2, column=1)
-        Label(master, text='Repeated:').grid(row=3, column=1)
-        Label(master, text='Is_learned:').grid(row=4, column=1)
-        Label(master, text='Answers:').grid(row=5, column=1)
+        self.rowconfigure([1,2,3,4,5,6,7], minsize=10, weight=1)
+        self.columnconfigure([1,2,3], minsize=10, weight=1)
+        
+        Label(self, text=f'{word.word.capitalize()}').grid(row=1, column=2, sticky='ns')
+        
+        Label(self, text='Id:').grid(row=2, column=1, sticky='w', padx=10, pady=5)
+        Label(self, text=f'{word.id}').grid(row=2, column=3, sticky='e', padx=10, pady=5)
+        
+        Label(self, text='Word:').grid(row=3, column=1, sticky='w', padx=10, pady=5)
+        Label(self, text=f'{word.word}').grid(row=3, column=3, sticky='e', padx=10, pady=5)
+        
+        Label(self, text='Translate:').grid(row=4, column=1, sticky='w', padx=10, pady=5)
+        Label(self, text=f'{word.translate}').grid(row=4, column=3, sticky='e', padx=10, pady=5)
+        
+        Label(self, text='Repeated:').grid(row=5, column=1, sticky='w', padx=10, pady=5)
+        Label(self, text=f'{word.repeated()}').grid(row=5, column=3, sticky='e', padx=10, pady=5)
+        
+        Label(self, text='Is_learned:').grid(row=6, column=1, sticky='w', padx=10, pady=5)
+        Label(self, text=f'{word.is_learned}').grid(row=6, column=3, sticky='e', padx=10, pady=5)
+        
+        Label(self, text='Answers:').grid(row=7, column=1, sticky='w', padx=10, pady=5)
+        Label(self, text=f'{word.answers}').grid(row=7, column=3, sticky='e', padx=10, pady=5)

@@ -1,6 +1,4 @@
-from cgitb import text
 from tkinter import BOTH, END, Entry, Frame, Label, Scrollbar, Tk, Button, Toplevel
-from tkinter.messagebox import showinfo
 from tkinter.ttk import Treeview
 
 
@@ -19,6 +17,8 @@ class UserPanel(Tk):
         self.get_word_by_id = get_word_by_id_callback
         self.rowconfigure([1,2,3], minsize=50, weight=1)
         self.columnconfigure(1, minsize=50, weight=1)
+        self.center_window()
+                
         self.frm_labels =Frame(self)
         Label(self.frm_labels, text='Word Translate Practice').grid(row=1, column=1)
         Label(self.frm_labels, text='You can use commands listed below:').grid(row=2,column=1)
@@ -57,6 +57,13 @@ class UserPanel(Tk):
             word = self.get_word_by_id(record[0])
             WordDetailPanel(self, word)
             
+    def center_window(self, w=1200, h=300):
+        ws = self.winfo_screenwidth()
+        hs = self.winfo_screenheight()
+        x = (ws/2) - (w/2)    
+        y = (hs/2) - (h/2)
+        self.geometry('%dx%d+%d+%d' % (w, h, x, y))
+            
     def add_word(self):
         p = AddWordPanel(self)
         word = p.get_word()
@@ -87,6 +94,8 @@ class AddWordPanel(Toplevel):
         self.translate = None
         self.rowconfigure([1,2,3], minsize=50, weight=1)
         self.columnconfigure([1,2], minsize=50, weight=1)
+        self.center_window()
+        
         Label(self, text='Word:').grid(row=1, column=1, sticky='e', padx=5)
         Label(self, text='Translate:').grid(row=2, column=1, sticky='e', padx=5)
         self.ent_word = Entry(self)
@@ -94,6 +103,13 @@ class AddWordPanel(Toplevel):
         self.ent_word.grid(row=1, column=2, sticky='w', padx=5)
         self.ent_translate.grid(row=2, column=2, sticky='w', padx=5)
         Button(self, text='Add', command = self.add).grid(row=3, column=2, sticky='w')
+        
+    def center_window(self, w=250, h=200):
+        ws = self.winfo_screenwidth()
+        hs = self.winfo_screenheight()
+        x = (ws/2) - (w/2)    
+        y = (hs/2) - (h/2)
+        self.geometry('%dx%d+%d+%d' % (w, h, x, y))
         
     def add(self):
         self.word = self.ent_word.get()
@@ -113,10 +129,22 @@ class AddWordPanel(Toplevel):
 class WordCheck(Toplevel):
     def __init__(self, master, word):
         super(WordCheck, self).__init__(master)
-        Label(self, text= word.word).grid(row=1, column=1)
-        Button(self, text='Yes', command=self.yes).grid(row=2, column=2)
-        Button(self, text='No', command=self.no).grid(row=2, column=1)
+        self.title(word.word.capitalize())
         self.response = None
+        self.rowconfigure([1,2], minsize=10, weight=1)
+        self.columnconfigure([1,2,3], minsize=10, weight=1)
+        self.center_window()
+        
+        Label(self, text= word.word, width=10).grid(row=1, column=2)
+        Button(self, text='Yes', command=self.yes).grid(row=2, column=3, padx=10, pady=10)
+        Button(self, text='No', command=self.no).grid(row=2, column=1, padx=10, pady=10)
+        
+    def center_window(self, w=300, h=100):
+        ws = self.winfo_screenwidth()
+        hs = self.winfo_screenheight()
+        x = (ws/2) - (w/2)    
+        y = (hs/2) - (h/2)
+        self.geometry('%dx%d+%d+%d' % (w, h, x, y))
         
     def yes(self):
         self.response = True
@@ -136,11 +164,20 @@ class WordLearn(Toplevel):
         super(WordLearn, self).__init__(master)
         self.title(f""""{word.word}" - completed its journey!""")
         self.response = None
+        self.center_window()
+        
         Label(self, text=f'You repeated this word for {word.repeated()} days.\nDid you learned this word?').pack(expand=True)
         self.frm_buttons = Frame(self)
         Button(self.frm_buttons, text='Yes', command=self.yes).grid(row=1, column=2, padx=50, sticky='e')
         Button(self.frm_buttons, text='No', command=self.no).grid(row=1, column=1, padx=50,sticky='w')
         self.frm_buttons.pack(expand=True)
+        
+    def center_window(self, w=300, h=100):
+        ws = self.winfo_screenwidth()
+        hs = self.winfo_screenheight()
+        x = (ws/2) - (w/2)    
+        y = (hs/2) - (h/2)
+        self.geometry('%dx%d+%d+%d' % (w, h, x, y))
         
     def yes(self):
         self.response = True
@@ -161,6 +198,7 @@ class WordDetailPanel(Toplevel):
         self.title(f'{word.word} - Detail')
         self.rowconfigure([1,2,3,4,5,6,7], minsize=10, weight=1)
         self.columnconfigure([1,2,3], minsize=10, weight=1)
+        self.center_window()
         
         Label(self, text=f'{word.word.capitalize()}').grid(row=1, column=2, sticky='ns')
         
@@ -181,3 +219,10 @@ class WordDetailPanel(Toplevel):
         
         Label(self, text='Answers:').grid(row=7, column=1, sticky='w', padx=10, pady=5)
         Label(self, text=f'{word.answers}').grid(row=7, column=3, sticky='e', padx=10, pady=5)
+
+    def center_window(self, w=500, h=300):
+        ws = self.winfo_screenwidth()
+        hs = self.winfo_screenheight()
+        x = (ws/2) - (w/2)    
+        y = (hs/2) - (h/2)
+        self.geometry('%dx%d+%d+%d' % (w, h, x, y))

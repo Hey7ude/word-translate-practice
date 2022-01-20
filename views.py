@@ -1,4 +1,5 @@
-from tkinter import END, Entry, Frame, Label, Scrollbar, Tk, Button, Toplevel
+from cgitb import text
+from tkinter import BOTH, END, Entry, Frame, Label, Scrollbar, Tk, Button, Toplevel
 from tkinter.messagebox import showinfo
 from tkinter.ttk import Treeview
 
@@ -130,13 +131,17 @@ class WordCheck(Toplevel):
         self.response is None and self.winfo_exists() and self.wait_window()
         return self.response
     
+    
 class WordLearn(Toplevel):
     def __init__(self, master, word):
         super(WordLearn, self).__init__(master)
+        self.title(f""""{word.word}" - completed its journey!""")
         self.response = None
-        Label(self, text=f'You repeated this word for {word.repeated()} days.\nDid you learned this word?').grid(row=1, column=1)
-        Button(self, text='Yes', command=self.yes).grid(row=2, column=2)
-        Button(self, text='No', command=self.no).grid(row=2, column=1)
+        Label(self, text=f'You repeated this word for {word.repeated()} days.\nDid you learned this word?').pack(expand=True)
+        self.frm_buttons = Frame(self)
+        Button(self.frm_buttons, text='Yes', command=self.yes).grid(row=1, column=2, padx=50, sticky='e')
+        Button(self.frm_buttons, text='No', command=self.no).grid(row=1, column=1, padx=50,sticky='w')
+        self.frm_buttons.pack(expand=True)
         
     def yes(self):
         self.response = True
@@ -149,3 +154,14 @@ class WordLearn(Toplevel):
     def get_response(self):
         self.response is None and self.wait_window()
         return self.response
+    
+
+class WordDetailPanel(Toplevel):
+    def __init__(self, master, word):
+        super(WordDetailPanel, self).__init__(self, master)
+        self.title(f'{word.word} - Detail')
+        Label(master, text='Word:').grid(row=1, column=1)
+        Label(master, text='Translate:').grid(row=2, column=1)
+        Label(master, text='Repeated:').grid(row=3, column=1)
+        Label(master, text='Is_learned:').grid(row=4, column=1)
+        Label(master, text='Answers:').grid(row=5, column=1)

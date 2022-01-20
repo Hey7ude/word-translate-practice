@@ -1,7 +1,10 @@
 import csv_manager
 
 class Word:
+    id = 0
     def __init__(self, word: str, translate: str, is_learned: bool=False, answers: list=[]):
+        self.id = Word.id
+        Word.id += 1
         self.word = word
         self.translate = translate
         self.is_learned = is_learned
@@ -33,6 +36,11 @@ class User:
         
     def check_repeated(self, word):
         return True if word.repeated() % self.repeat == 0 else False
+    
+    def get_word_by_id(self, id: int):
+        for word in self.words:
+            if word.id == id:
+                return word
         
     def learned(self, word):
         word.is_learned = True
